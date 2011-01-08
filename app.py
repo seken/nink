@@ -70,6 +70,7 @@ class Application(pyglet.window.Window):
 		with nested(self.winTexture):
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+		self.make_menu_mesh()
 	
 		# Sounds
 		self.bg_music = pyglet.media.load('sound/TIGshot.mp3')
@@ -280,32 +281,35 @@ class Application(pyglet.window.Window):
 			tex = self.winTexture
 			
 		with nested(self.program, tex):
-			position = [
-				-1, -1, 0,
-				-1, 1, 0,
-				1, 1, 0,
-				1, -1, 0,
-			]
-			texCoord = [
-				0, 0,
-				0, 1,
-				1, 1,
-				1, 0,
-			]
-			normal = [
-				0, 0, 1,
-				0, 0, 1,
-				0, 0, 1,
-				0, 0, 1,
-			]
-			position = (c_float*len(position))(*position)
-			texCoord = (c_float*len(texCoord))(*texCoord)
-			normal = (c_float*len(normal))(*normal)
-			VBO(4,
-				position_3=position,
-				texCoord_2=texCoord,
-				normal_3=normal).draw(GL_QUADS)
-				
+			self.menu_mesh.draw(GL_QUADS)
+	
+	def make_menu_mesh(self):
+		position = [
+			-1, -1, 0,
+			-1, 1, 0,
+			1, 1, 0,
+			1, -1, 0,
+		]
+		texCoord = [
+			0, 0,
+			0, 1,
+			1, 1,
+			1, 0,
+		]
+		normal = [
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+		]
+		position = (c_float*len(position))(*position)
+		texCoord = (c_float*len(texCoord))(*texCoord)
+		normal = (c_float*len(normal))(*normal)
+		self.menu_mesh = VBO(4,
+			position_3=position,
+			texCoord_2=texCoord,
+			normal_3=normal)
+	
 	def update_camera(self):
 		pPos = self.player.position
 		self.camera = Matrix().rotatex(0.07) * Matrix().rotatey(self.player.angle) * Matrix().translate(-pPos.x, -pPos.y, -pPos.z) * Matrix().translate(-6*math.sin(-self.player.angle*2*math.pi), -3, -6*math.cos(-self.player.angle*2*math.pi))
