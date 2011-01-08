@@ -74,6 +74,7 @@ class Application(pyglet.window.Window):
 	
 		# Sounds
 		self.bg_music = pyglet.media.load('sound/TIGshot.mp3')
+		self.win_sound = pyglet.media.load('sound/win.wav')
 		self.hurt_sound = pyglet.media.StaticSource(pyglet.media.load('sound/hurt.wav'))
 		self.pickup_sound = pyglet.media.StaticSource(pyglet.media.load('sound/pickup.wav'))
 		self.arrow_sound = pyglet.media.StaticSource(pyglet.media.load('sound/arrow.wav'))
@@ -116,6 +117,7 @@ class Application(pyglet.window.Window):
 		for row in points:
 			point = ((float(row[1])/mapimg.width * 96*2) - 96, (float(row[2])/mapimg.width * 96*2) - 96)
 			if row[0] == 'start':
+				self.start_point = Vector(point[0], 0, point[1])
 				self.player = self.create_protagonist(self.walls.collisionMap, point)
 			elif row[0] == 'husband':
 				h = self.create_husband(self.walls.collisionMap, point)
@@ -200,6 +202,7 @@ class Application(pyglet.window.Window):
 			self.player.update(delta, self)
 			self.update_camera()
 			
+			# Update and remove dead arrows
 			arrow_delete = []
 			for i in self.arrows:
 				if not i.update(delta, self):
@@ -208,13 +211,18 @@ class Application(pyglet.window.Window):
 			for i in arrow_delete:
 				self.arrows.remove(i)
 			
+			# Update friends
 			for i in self.friendly:
 				i.update(delta, self)
+				
+			# Update enemy
 			for i in self.enemy:
 				i.update(delta, self)
 				
+			# Collision Test
 			self.test_arrows()
 				
+			# End condition tests
 			if self.husband.health < 0:
 				self.death_sound.play()
 				self.bg_music.pause()
@@ -223,6 +231,14 @@ class Application(pyglet.window.Window):
 				self.death_sound.play()
 				self.bg_music.pause()
 				self.game = 3
+			
+			
+			distanceToSteps = (self.player.position - self.start_point) + (self.husband.position - self.start_point)
+			if distanceToSteps.len() < 4:
+				self.game = 4
+				self.bg_music.pause()
+				self.win_sound.play()
+			
 				
 	def poke_friends(self):
 		if self.player.cooldown < 0:
