@@ -45,7 +45,7 @@ def gaus2d(xc, yc, xs, ys, x, y):
 	j=math.pow(y-yc,2)/(2*math.pow(ys,2))
 	return math.pow(math.e, -(i+j))
 						
-class Application(pyglet.window.Window):
+class Application(pyglet.window.Window, map_name):
 	def __init__(self):
 		super(Application, self).__init__(resizable=True, width=512, height=512, caption='Nink saves the town')
 		
@@ -82,6 +82,7 @@ class Application(pyglet.window.Window):
 		self.goblin_death_sound = pyglet.media.StaticSource(pyglet.media.load('sound/goblin_death.wav'))
 		self.follow_sound = pyglet.media.StaticSource(pyglet.media.load('sound/follow.wav'))
 		
+		self.time = 0
 		self.game = 0
 		self.camera = Matrix()
 		self.camera = self.camera.translate(0, -5, -10)
@@ -90,7 +91,7 @@ class Application(pyglet.window.Window):
 		self.characters = pyglet.image.ImageGrid(pyglet.image.load('images/char.png'),16,31, 8, 8)
 		
 		# Map
-		mapimg = pyglet.image.load('images/ground3.png')
+		mapimg = pyglet.image.load('map/'+map_name+'.png')
 		self.ground = self.create_ground(mapimg)
 		self.walls = self.create_walls(mapimg)
 		
@@ -113,7 +114,7 @@ class Application(pyglet.window.Window):
 		self.gold = []
 			
 		# Datapoints
-		points = csv.reader(open('points.txt', 'rb'), delimiter=',')
+		points = csv.reader(open('map/'+map_name+'.txt', 'rb'), delimiter=',')
 		for row in points:
 			point = ((float(row[1])/mapimg.width * 96*2) - 96, (float(row[2])/mapimg.width * 96*2) - 96)
 			if row[0] == 'start':
@@ -184,6 +185,9 @@ class Application(pyglet.window.Window):
 		return Protagonist(character, self.program, 1, 1, position, collisionMap)
 		
 	def on_update(self, delta):
+		
+		self.time+= delta
+		
 		if self.keys[key.D]:
 			self.player.move(Vector(2.5, 0, 0)*delta)
 		if self.keys[key.A]:
@@ -376,5 +380,5 @@ class Application(pyglet.window.Window):
 		return pyglet.event.EVENT_HANDLED
 
 if __name__ == '__main__':
-	window = Application()
+	window = Application('ground3')
 	pyglet.app.run()
