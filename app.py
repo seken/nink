@@ -79,6 +79,7 @@ class Application(pyglet.window.Window):
 		self.arrow_sound = pyglet.media.StaticSource(pyglet.media.load('sound/arrow.wav'))
 		self.death_sound = pyglet.media.StaticSource(pyglet.media.load('sound/death.wav'))
 		self.goblin_death_sound = pyglet.media.StaticSource(pyglet.media.load('sound/goblin_death.wav'))
+		self.follow_sound = pyglet.media.StaticSource(pyglet.media.load('sound/follow.wav'))
 		
 		self.game = 0
 		self.camera = Matrix()
@@ -181,7 +182,6 @@ class Application(pyglet.window.Window):
 		return Protagonist(character, self.program, 1, 1, position, collisionMap)
 		
 	def on_update(self, delta):
-		
 		if self.keys[key.D]:
 			self.player.move(Vector(2.5, 0, 0)*delta)
 		if self.keys[key.A]:
@@ -192,6 +192,8 @@ class Application(pyglet.window.Window):
 			self.player.turn(0.01)
 		if self.keys[key.SPACE]:
 			self.fire_arrow(self.player)
+		if self.keys[key.M]:
+			self.poke_friends()
 			
 		if self.game == 1:
 			self.ground.update(delta)
@@ -222,6 +224,12 @@ class Application(pyglet.window.Window):
 				self.bg_music.pause()
 				self.game = 3
 				
+	def poke_friends(self):
+		if self.player.cooldown < 0:
+			self.player.cooldown = 0.75
+			self.follow_sound.play()
+			for i in self.friendly:
+				i.poked()
 	
 	def fire_arrow(self, person):
 		if person.cooldown < 0:
