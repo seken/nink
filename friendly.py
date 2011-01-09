@@ -30,7 +30,7 @@ class Friendly(Protagonist):
 					# find the rotation between self and gold
 					self.point(-distance.toAngle() + 0.25)
 					if distance.len() > 1.0:
-						self.move(Vector(2.0, 0, 0)*delta)
+						self.move(Vector(1.8, 0, 0)*delta)
 					else:
 						if i.value > delta:
 							self.gold += delta

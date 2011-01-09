@@ -28,7 +28,7 @@ class Enemy(Protagonist):
 			# find the rotation between self and person
 			finished = False
 			self.point(-distance.toAngle() + 0.25)
-			if distance.len() > 0.8:
+			if distance.len() > 1.0:
 				self.move(Vector(1.8, 0, 0)*delta)
 			if distance.len() < 1.2 and self.cooldown < 0:
 				state.hurt_sound.play()

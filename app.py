@@ -319,6 +319,8 @@ class Application(pyglet.window.Window):
 			person.cooldown = 0.75
 			self.arrow_sound.play()
 			other.hit()
+			if other.health <= 0:
+				self.enemy.remove(other)
 	
 	def test_arrows(self):
 		hit_enemies = []
