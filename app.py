@@ -82,6 +82,7 @@ class Application(pyglet.window.Window):
 		self.goblin_death_sound = pyglet.media.StaticSource(pyglet.media.load('sound/goblin_death.wav'))
 		self.follow_sound = pyglet.media.StaticSource(pyglet.media.load('sound/follow.wav'))
 		
+		self.scale = 96/2
 		self.time = 0
 		self.game = 0
 		self.camera = Matrix()
@@ -169,7 +170,7 @@ class Application(pyglet.window.Window):
 		# Datapoints
 		points = csv.reader(open('map/'+map_name+'.txt', 'rb'), delimiter=',')
 		for row in points:
-			point = ((float(row[1])/mapimg.width * 96*2) - 96, (float(row[2])/mapimg.width * 96*2) - 96)
+			point = (((float(row[1])+0.5)/mapimg.width * self.scale*2) - self.scale, ((float(row[2])-0.5)/mapimg.width * self.scale*2) - self.scale)
 			if row[0] == 'start':
 				self.start_point = Vector(point[0], 0, point[1])
 				self.player = self.create_protagonist(self.walls.collisionMap, point)
@@ -219,7 +220,7 @@ class Application(pyglet.window.Window):
 		ttex = Texture(tiles.width, tiles.height, unit=GL_TEXTURE1, data=tiles.get_data('RGBA', tiles.width*4))
 		tdim = Vector(tiles.width/8, tiles.height/8, 64-8)
 		
-		g = Ground(gtex, ttex, tdim, Vector(gmap.width, gmap.height, 0), Vector(-96, -96, 0), Vector(96, 96, 0))
+		g = Ground(gtex, ttex, tdim, Vector(gmap.width, gmap.height, 0), Vector(-self.scale, -self.scale, 0), Vector(self.scale, self.scale, 0))
 		return g
 		
 	def create_walls(self, mapimg):
@@ -229,7 +230,7 @@ class Application(pyglet.window.Window):
 		ttex = Texture(tiles.width, tiles.height, unit=GL_TEXTURE1, data=tiles.get_data('RGBA', tiles.width*4))
 		tdim = Vector(tiles.width/8, tiles.height/8, 64-8)
 		
-		w = Walls(gtex, ttex, tdim, Vector(gmap.width, gmap.height, 0), Vector(-96, -96, 0), Vector(96, 96, 0))
+		w = Walls(gtex, ttex, tdim, Vector(gmap.width, gmap.height, 0), Vector(-self.scale, -self.scale, 0), Vector(self.scale, self.scale, 0))
 		return w
 		
 	def create_protagonist(self, collisionMap, position):
@@ -264,16 +265,13 @@ class Application(pyglet.window.Window):
 				if not i.update(delta, self):
 					arrow_delete.append(i)
 			
-			for i in arrow_delete:
-				self.arrows.remove(i)
+			map(self.arrows.remove, arrow_delete)
 			
 			# Update friends
-			for i in self.friendly:
-				i.update(delta, self)
+			map(lambda i : i.update(delta, self), self.friendly)
 				
 			# Update enemy
-			for i in self.enemy:
-				i.update(delta, self)
+			map(lambda i : i.update(delta, self), self.enemy)
 				
 			# Collision Test
 			self.test_arrows()
@@ -322,10 +320,10 @@ class Application(pyglet.window.Window):
 					hit_arrows.append(a)
 					self.goblin_death_sound.play()
 					break
-		for i in hit_enemies:
-			self.enemy.remove(i)
-		for i in hit_arrows:
-			self.arrows.remove(i)
+		remove = self.enemy.remove
+		map(remove, hit_enemies)
+		remove = self.arrows.remove
+		map(remove, hit_arrows)
 	
 	def on_draw(self):
 		self.clear()
@@ -432,5 +430,5 @@ class Application(pyglet.window.Window):
 		return pyglet.event.EVENT_HANDLED
 
 if __name__ == '__main__':
-	window = Application('ground4')
+	window = Application('ground5')
 	pyglet.app.run()

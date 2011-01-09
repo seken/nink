@@ -9,16 +9,17 @@ class Enemy(Protagonist):
 	def update(self, delta, state):
 		self.cooldown -= delta
 		
-		attacked = False
-		for i in state.friendly:
-			attacked = self.attack_person(delta, i, state)
-			if attacked:
-				break
+		if (self.position - state.player.position).len() < 15:
+			attacked = False
+			for i in state.friendly:
+				attacked = self.attack_person(delta, i, state)
+				if attacked:
+					break
 				
-		if not attacked:
-			self.attack_person(delta, state.player, state)
+			if not attacked:
+				self.attack_person(delta, state.player, state)
 			
-		super(Enemy, self).update(delta, state)
+			super(Enemy, self).update(delta, state)
 		
 	def attack_person(self, delta, person, state):
 		distance = person.position - self.position

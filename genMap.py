@@ -42,10 +42,10 @@ def dist(p1, p2):
 class Application(pyglet.window.Window):
 	def __init__(self):
 		super(Application, self).__init__(resizable=True)
-		self.mapSize = 128
+		self.mapSize = 64
 		self.mapTexture = Texture(self.mapSize, self.mapSize, data=[0,0,0,255]*(self.mapSize*self.mapSize))
 		
-		self.probContinue = 0.82
+		self.probContinue = 0.75
 		self.minSquares = 10
 		
 		# keep away from start and friends (and gold)
@@ -55,11 +55,11 @@ class Application(pyglet.window.Window):
 		self.husband_distance = 30
 		
 		# probability of placement
-		self.prob_goblin = 0.02
-		self.prob_friend = 0.02
-		self.prob_gold = 0.02
-		self.prob_king = 0.005
-		self.prob_husband = 0.005
+		self.prob_goblin = 0.03
+		self.prob_friend = 0.03
+		self.prob_gold = 0.03
+		self.prob_king = 0.008
+		self.prob_husband = 0.008
 		
 		self.new_map()
 		

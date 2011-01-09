@@ -13,10 +13,12 @@ class Friendly(Protagonist):
 		self.pokeTimer-=delta
 		
 		# Repel away from other friends
-		for i in state.friendly:
-			distance = self.position - i.position
-			if distance.len() < 1.0:
-				self.position = self.position + (distance*0.1)
+		if (self.position - state.player.position).len() < 15:
+			for i in state.friendly:
+				distance = self.position - i.position
+				if distance.len() < 1.0:
+					if not self.collisionMap.collision(self.position + (distance*0.1), self.x/4):
+						self.position = self.position + (distance*0.1)
 		
 		uMoved = False
 		
@@ -35,30 +37,31 @@ class Friendly(Protagonist):
 					break
 					
 		# Kill the bad guys
-		for i in state.enemy:
-			distance = i.position - self.position
+		if (self.position - state.player.position).len() < 15:
+			for i in state.enemy:
+				distance = i.position - self.position
 			
-			if self.husband:
-				if distance.len() < 4.0 and self.within(state.player.position):
-					self.point(-distance.toAngle() + 0.25)
-					state.fire_arrow(self)
-					uMoved = True
-					break
-			else:
-				if distance.len() < 1.0:
-					self.point(-distance.toAngle() + 0.25)
-					state.fire_arrow(self)
-					uMoved = True
-					break
+				if self.husband:
+					if distance.len() < 4.0 and self.within(state.player.position):
+						self.point(-distance.toAngle() + 0.25)
+						state.fire_arrow(self)
+						uMoved = True
+						break
+				else:
+					if distance.len() < 1.0:
+						self.point(-distance.toAngle() + 0.25)
+						state.fire_arrow(self)
+						uMoved = True
+						break
 		
-		# Follow the girl
-		distance = state.player.position - self.position
-		if (not uMoved) and distance.len() < 5.0 and self.within(state.player.position):
-			# find the rotation between self and player
-			self.point(-distance.toAngle() + 0.25)
-			if distance.len() > 2.0:
-				self.move(Vector(2.0, 0, 0)*delta)
-		super(Friendly, self).update(delta, state)
+			# Follow the girl
+			distance = state.player.position - self.position
+			if (not uMoved) and distance.len() < 5.0 and self.within(state.player.position):
+				# find the rotation between self and player
+				self.point(-distance.toAngle() + 0.25)
+				if distance.len() > 2.0:
+					self.move(Vector(2.0, 0, 0)*delta)
+			super(Friendly, self).update(delta, state)
 		
 	def poked(self):
 		self.pokeTimer = 4.0
