@@ -552,5 +552,8 @@ class Application(pyglet.window.Window):
 		return pyglet.event.EVENT_HANDLED
 
 if __name__ == '__main__':
-	window = Application('ground5', os.path.dirname(sys.argv[0]))
+	path = os.path.dirname(sys.argv[0])
+	if len(path) == 0:
+		path='.'
+	window = Application('ground5', path)
 	pyglet.app.run()
