@@ -34,3 +34,9 @@ Credits
 Code, design: Mark Goodall (markit@seken.co.uk)
 Textures: Oryz (http://cgbarrett.squarespace.com)
 Sound: Cheapshot (http://forums.tigsource.com/index.php?topic=8949.0)
+
+Requirements
+---------
+Python 2.?
+gletools (by Florian Bšsch) http://codeflow.org/entries/2009/jul/31/gletools-advanced-pyglet-utilities/ - included
+piglet (Copyright 2006-2008 Alex Holkner) http://www.pyglet.org/ - included
