@@ -325,7 +325,7 @@ class Application(pyglet.window.Window):
 		hit_arrows = []
 		for a in self.arrows:
 			for e in self.enemy:
-				if (a.position - e.position).len() < e.x/2:
+				if (a.position - e.position).len() < e.x:
 					hit_arrows.append(a)
 					e.hit()
 					if e.health <= 0:
