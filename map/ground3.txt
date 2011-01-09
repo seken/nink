@@ -1,5 +1,0 @@
-start, 62, 64
-husband, 63, 50
-friend, 64, 64
-enemy, 68, 68
-gold, 68, 68
