@@ -81,6 +81,7 @@ class Application(pyglet.window.Window):
 		mapimg = pyglet.image.load('map/'+map_name+'.png')
 		self.ground = self.create_ground(mapimg)
 		self.walls = self.create_walls(mapimg)
+		self.create_minimap()
 		
 		# Normal Mesh
 		position = [
@@ -345,8 +346,8 @@ class Application(pyglet.window.Window):
 			light = random.random()
 			p = self.player.position
 			
-			self.ground.draw(self.projection, self.camera, p, light)
 			self.walls.draw(self.projection, self.camera, p, light)
+			self.ground.draw(self.projection, self.camera, p, light)
 			
 			transparency = self.arrows + self.friendly + self.enemy + self.gold + [self.player]
 			
@@ -357,7 +358,9 @@ class Application(pyglet.window.Window):
 				if (p - i.position).len() < 18:
 					i.draw(self.projection, self.camera, p, light)
 				
+			glClear(GL_DEPTH_BUFFER_BIT)
 			self.draw_hearts()
+			self.draw_minimap()
 		else:
 			self.draw_menu(self.game)
 	
@@ -392,6 +395,42 @@ class Application(pyglet.window.Window):
 				count = 1
 			for i in range(count):
 				self.heart_mesh[i].draw(GL_QUADS)
+				
+	def create_minimap(self):
+		self.mm_tex = Texture.open('map/%s.png'%(self.map_name), unit=GL_TEXTURE0, filter=GL_NEAREST)
+		position = [
+			0.4, 0.4, 0,
+			0.4, 1, 0,
+			1, 1, 0,
+			1, 0.4, 0,
+		]
+		texCoord = [
+			0, 0,
+			0, 1,
+			1, 1,
+			1, 0,
+		]
+		normal = [
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+		]
+		position = (c_float*len(position))(*position)
+		texCoord = (c_float*len(texCoord))(*texCoord)
+		normal = (c_float*len(normal))(*normal)
+		self.mm_mesh = VBO(4,
+			position_3=position,
+			texCoord_2=texCoord,
+			normal_3=normal)
+		
+	def draw_minimap(self):
+		self.program.vars.mvp = Matrix()
+		self.program.vars.modelview = Matrix()
+		self.program.vars.playerPosition = (0.0, 0.0, 0.0)
+		self.program.vars.playerLight = random.random()*0.1 + 0.9
+		with nested(self.program, self.mm_tex):
+			self.mm_mesh.draw(GL_QUADS)
 	
 	def make_menu_mesh(self):
 		position = [
