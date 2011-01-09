@@ -16,7 +16,7 @@ class Friendly(Protagonist):
 		if (self.position - state.player.position).len() < 15:
 			for i in state.friendly:
 				distance = self.position - i.position
-				if distance.len() < 1.0:
+				if distance.len() < 0.5:
 					if not self.collisionMap.collision(self.position + (distance*0.1), self.x/4):
 						self.position = self.position + (distance*0.1)
 		
@@ -32,7 +32,12 @@ class Friendly(Protagonist):
 					if distance.len() > 1.0:
 						self.move(Vector(2.0, 0, 0)*delta)
 					else:
-						self.gold += delta
+						if i.value > delta:
+							self.gold += delta
+							i.value -= delta
+						else:
+							self.gold += i.value
+							i.value = 0
 					uMoved = True
 					break
 					

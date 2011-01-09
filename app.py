@@ -272,6 +272,13 @@ class Application(pyglet.window.Window):
 				
 			# Update enemy
 			map(lambda i : i.update(delta, self), self.enemy)
+			
+			# Update gold
+			gold_delete = []
+			for i in self.gold:
+				if i.value == 0:
+					gold_delete.append(i)
+			map(self.gold.remove, gold_delete)
 				
 			# Collision Test
 			self.test_arrows()
