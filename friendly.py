@@ -2,8 +2,8 @@ from protagonist import Protagonist
 from vector import Vector
 
 class Friendly(Protagonist):
-	def __init__(self, texture, program, x, y, position, collisionMap):
-		super(Friendly, self).__init__(texture, program, x, y, position, collisionMap)
+	def __init__(self, texture, program, x, y, position, collisionMap, mesh):
+		super(Friendly, self).__init__(texture, program, x, y, position, collisionMap, mesh)
 		self.husband = False
 		self.pokeTimer = 0.0
 		self.gold = 0.0

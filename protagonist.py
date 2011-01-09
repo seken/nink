@@ -12,7 +12,7 @@ def xfrange(start, stop, step):
         start += step
 
 class Protagonist(object):
-	def __init__(self, texture, program, x, y, position, collisionMap):
+	def __init__(self, texture, program, x, y, position, collisionMap, mesh):
 		super(Protagonist, self).__init__()
 		self.tex = texture
 		self.prog = program
@@ -27,31 +27,7 @@ class Protagonist(object):
 		self.modelview = Matrix().translate(position[0], self.y/2, position[1])
 		self.moved = False
 		self.angle = 0
-		position = [
-			-self.x/2, -self.y/2, 0,
-			-self.x/2, self.y/2, 0,
-			self.x/2, self.y/2, 0,
-			self.x/2, -self.y/2, 0,
-		]
-		texCoord = [
-			0, 0,
-			0, 1,
-			1, 1,
-			1, 0,
-		]
-		normal = [
-			0, 0, 1,
-			0, 0, 1,
-			0, 0, 1,
-			0, 0, 1,
-		]
-		position = (c_float*len(position))(*position)
-		texCoord = (c_float*len(texCoord))(*texCoord)
-		normal = (c_float*len(normal))(*normal)
-		self.mesh = VBO(4,
-			position_3=position,
-			texCoord_2=texCoord,
-			normal_3=normal)
+		self.mesh = mesh
 		with nested(self.tex):
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)

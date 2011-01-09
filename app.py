@@ -95,6 +95,59 @@ class Application(pyglet.window.Window):
 		self.ground = self.create_ground(mapimg)
 		self.walls = self.create_walls(mapimg)
 		
+		# Normal Mesh
+		position = [
+			-0.5, -0.5, 0,
+			-0.5, 0.5, 0,
+			0.5, 0.5, 0,
+			0.5, -0.5, 0,
+		]
+		texCoord = [
+			0, 0,
+			0, 1,
+			1, 1,
+			1, 0,
+		]
+		normal = [
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+		]
+		position = (c_float*len(position))(*position)
+		texCoord = (c_float*len(texCoord))(*texCoord)
+		normal = (c_float*len(normal))(*normal)
+		self.normal_mesh = VBO(4,
+			position_3=position,
+			texCoord_2=texCoord,
+			normal_3=normal)
+		# Gold Mesh
+		position = [
+			-0.25, -0.25, 0,
+			-0.25, 0.25, 0,
+			0.25, 0.25, 0,
+			0.25, -0.25, 0,
+		]
+		texCoord = [
+			0, 0,
+			0, 1,
+			1, 1,
+			1, 0,
+		]
+		normal = [
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+		]
+		position = (c_float*len(position))(*position)
+		texCoord = (c_float*len(texCoord))(*texCoord)
+		normal = (c_float*len(normal))(*normal)
+		self.gold_mesh = VBO(4,
+			position_3=position,
+			texCoord_2=texCoord,
+			normal_3=normal)
+		
 		# Friend texture
 		character = pyglet.image.load('images/others.png')
 		self.friendTex = Texture(character.width, character.height, data=character.get_data('RGBA', character.width*4))
@@ -143,21 +196,21 @@ class Application(pyglet.window.Window):
 	def create_husband(self, collision_map, position):
 		character = pyglet.image.load('images/husband.png')
 		character = Texture(character.width, character.height, data=character.get_data('RGBA', character.width*4))
-		return Friendly(character, self.program, 1, 1, position, collision_map)
+		return Friendly(character, self.program, 1, 1, position, collision_map, self.normal_mesh)
 		
 	def create_friend(self, collision_map, position, texture):
 		character = pyglet.image.load('images/others.png')
 		character = Texture(character.width, character.height, data=character.get_data('RGBA', character.width*4))
-		return Friendly(character, self.program, 1, 1, position, collision_map)
+		return Friendly(character, self.program, 1, 1, position, collision_map, self.normal_mesh)
 		
 	def create_gold(self, collision_map, position):
-		gold = Gold(self.goldTex, self.program, 0.5, 0.5, position, collision_map)
+		gold = Gold(self.goldTex, self.program, 0.5, 0.5, position, collision_map, self.gold_mesh)
 		return gold
 		
 	def create_enemy(self, collision_map, position):
 		character = pyglet.image.load('images/enemy.png')
 		character = Texture(character.width, character.height, data=character.get_data('RGBA', character.width*4))
-		return Enemy(character, self.program, 1, 1, position, collision_map)
+		return Enemy(character, self.program, 1, 1, position, collision_map, self.normal_mesh)
 		
 	def create_ground(self, mapimg):
 		gmap = mapimg
@@ -182,7 +235,7 @@ class Application(pyglet.window.Window):
 	def create_protagonist(self, collisionMap, position):
 		character = pyglet.image.load('images/nink.png')
 		character = Texture(character.width, character.height, data=character.get_data('RGBA', character.width*4))
-		return Protagonist(character, self.program, 1, 1, position, collisionMap)
+		return Protagonist(character, self.program, 1, 1, position, collisionMap, self.normal_mesh)
 		
 	def on_update(self, delta):
 		
@@ -255,7 +308,7 @@ class Application(pyglet.window.Window):
 			person.cooldown = 0.75
 			self.arrow_sound.play()
 			position = (person.position.x, person.position.z)
-			arrow = Arrow(self.arrowTex, self.program, 1, 1, position, person.collisionMap)
+			arrow = Arrow(self.arrowTex, self.program, 1, 1, position, person.collisionMap, self.normal_mesh)
 			arrow.point(person.angle)
 			self.arrows.append(arrow)
 	

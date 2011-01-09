@@ -3,8 +3,8 @@ from vector import Vector
 from gletools import Matrix
 
 class Arrow(Protagonist):
-	def __init__(self, texture, program, x, y, position, collisionMap):
-		super(Arrow, self).__init__(texture, program, x, y, position, collisionMap)
+	def __init__(self, texture, program, x, y, position, collisionMap, mesh):
+		super(Arrow, self).__init__(texture, program, x, y, position, collisionMap, mesh)
 		self.cooldown = 2.0
 		self.maxSpeed = 20
 		self.velocity = Vector(20.0, 0.0, 0.0)

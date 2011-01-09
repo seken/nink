@@ -8,5 +8,5 @@ from vector import Vector
 from protagonist import Protagonist
 
 class Gold(Protagonist):
-	def __init__(self, texture, program, x, y, position, collision_map):
-		super(Gold, self).__init__(texture, program, x, y, position, collision_map)
+	def __init__(self, texture, program, x, y, position, collision_map, mesh):
+		super(Gold, self).__init__(texture, program, x, y, position, collision_map, mesh)
