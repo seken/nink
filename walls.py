@@ -11,11 +11,11 @@ class Walls(object):
 	wallVals = [10, 11, 12, 13, 26, 28, 29, 30, 31, 32, 33, 46, 47, 48, 49, 50, 51]
 	earthVal = 26
 	
-	def __init__(self, texture, tiles, tdim, res, minc, maxc):
+	def __init__(self, texture, tiles, tdim, res, minc, maxc, path):
 		super(Walls, self).__init__()
 		self.map = texture
 		self.tiles = tiles
-		self.prog = ShaderProgram.open('shaders/wall.shader')
+		self.prog = ShaderProgram.open(path+'/shaders/wall.shader')
 		self.prog.vars.map = Sampler2D(GL_TEXTURE0)
 		self.prog.vars.tiles = Sampler2D(GL_TEXTURE1)
 		self.prog.vars.tNumX = tdim.x

@@ -6,11 +6,11 @@ from gletools import ShaderProgram, Sampler2D, Matrix, Texture, VBO
 from ctypes import c_float
 
 class Ground(object):
-	def __init__(self, texture, tiles, tdim, res, minc, maxc):
+	def __init__(self, texture, tiles, tdim, res, minc, maxc, path):
 		super(Ground, self).__init__()
 		self.map = texture
 		self.tiles = tiles
-		self.prog = ShaderProgram.open('shaders/ground.shader')
+		self.prog = ShaderProgram.open(path+'/shaders/ground.shader')
 		self.prog.vars.map = Sampler2D(GL_TEXTURE0)
 		self.prog.vars.tiles = Sampler2D(GL_TEXTURE1)
 		self.prog.vars.tNumX = tdim.x

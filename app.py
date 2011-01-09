@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from __future__ import with_statement
 from contextlib import nested
-import random, csv, os, webbrowser, hashlib, math, pyglet
+import random, csv, os, webbrowser, hashlib, math, pyglet, sys
 from pyglet.window import key
 from pyglet.gl import *
 from gletools import ShaderProgram, Sampler2D, Matrix, Texture, VBO
@@ -13,7 +13,7 @@ from protagonist import Protagonist
 from friendly import Friendly
 from enemy import Enemy
 from gold import Gold
-from arrow import Arrow 
+from arrow import Arrow
 
 def clamp(start, end, value):
 	'''
@@ -42,43 +42,44 @@ def gaus2d(xc, yc, xs, ys, x, y):
 	return math.pow(math.e, -(i+j))
 						
 class Application(pyglet.window.Window):
-	def __init__(self, map_name):
+	def __init__(self, map_name, path):
 		super(Application, self).__init__(resizable=True, width=512, height=512, caption='Nink saves the town')
 		
 		# Start screen
-		self.menuTexture = Texture.open('images/start.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
-		self.husbTexture = Texture.open('images/husb_death.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
-		self.ninkTexture = Texture.open('images/nink_death.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
-		self.winTexture = Texture.open('images/win.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
+		self.menuTexture = Texture.open(path+'/images/start.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
+		self.husbTexture = Texture.open(path+'/images/husb_death.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
+		self.ninkTexture = Texture.open(path+'/images/nink_death.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
+		self.winTexture = Texture.open(path+'/images/win.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
 		self.make_menu_mesh()
 		
 		# Healthbar
-		self.heart = Texture.open('images/heart.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
+		self.heart = Texture.open(path+'/images/heart.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
 		self.make_heart_meshes()
 		
 		# Sounds
-		self.bg_music = pyglet.media.load('sound/TIGshot.mp3')
-		self.win_sound = pyglet.media.load('sound/win.wav')
-		self.hurt_sound = pyglet.media.StaticSource(pyglet.media.load('sound/hurt.wav'))
-		self.pickup_sound = pyglet.media.StaticSource(pyglet.media.load('sound/pickup.wav'))
-		self.arrow_sound = pyglet.media.StaticSource(pyglet.media.load('sound/arrow.wav'))
-		self.death_sound = pyglet.media.StaticSource(pyglet.media.load('sound/death.wav'))
-		self.goblin_death_sound = pyglet.media.StaticSource(pyglet.media.load('sound/goblin_death.wav'))
-		self.follow_sound = pyglet.media.StaticSource(pyglet.media.load('sound/follow.wav'))
+		self.bg_music = pyglet.media.load(path+'/sound/TIGshot.mp3')
+		self.win_sound = pyglet.media.load(path+'/sound/win.wav')
+		self.hurt_sound = pyglet.media.StaticSource(pyglet.media.load(path+'/sound/hurt.wav'))
+		self.pickup_sound = pyglet.media.StaticSource(pyglet.media.load(path+'/sound/pickup.wav'))
+		self.arrow_sound = pyglet.media.StaticSource(pyglet.media.load(path+'/sound/arrow.wav'))
+		self.death_sound = pyglet.media.StaticSource(pyglet.media.load(path+'/sound/death.wav'))
+		self.goblin_death_sound = pyglet.media.StaticSource(pyglet.media.load(path+'/sound/goblin_death.wav'))
+		self.follow_sound = pyglet.media.StaticSource(pyglet.media.load(path+'/sound/follow.wav'))
 		
 		self.scale = 96/2
 		self.time = 0
 		self.game = 0
 		self.camera = Matrix()
 		self.camera = self.camera.translate(0, -5, -10)
+		self.path = path
 		
 		# Main shader
-		self.program = ShaderProgram.open('shaders/main.shader')
+		self.program = ShaderProgram.open(path+'/shaders/main.shader')
 		self.program.vars.tex = Sampler2D(GL_TEXTURE0)
 		
 		# Map
 		self.map_name = map_name
-		mapimg = pyglet.image.load('map/'+map_name+'.png')
+		mapimg = pyglet.image.load(path+'/map/'+map_name+'.png')
 		self.ground = self.create_ground(mapimg)
 		self.walls = self.create_walls(mapimg)
 		self.create_minimap()
@@ -137,15 +138,15 @@ class Application(pyglet.window.Window):
 			normal_3=normal)
 		
 		# Friend texture
-		character = pyglet.image.load('images/others.png')
+		character = pyglet.image.load(path+'/images/others.png')
 		self.friendTex = Texture(character.width, character.height, data=character.get_data('RGBA', character.width*4))
 		
 		# Gold texture
-		gold = pyglet.image.load('images/gold.png')
+		gold = pyglet.image.load(path+'/images/gold.png')
 		self.goldTex = Texture(gold.width, gold.height, data=gold.get_data('RGBA', gold.width*4))
 		
 		# Arrow texture
-		arrow = pyglet.image.load('images/arrow.png')
+		arrow = pyglet.image.load(path+'/images/arrow.png')
 		self.arrowTex = Texture(arrow.width, arrow.height, data=arrow.get_data('RGBA', arrow.width*4))
 		
 		# Game state
@@ -155,7 +156,7 @@ class Application(pyglet.window.Window):
 		self.gold = []
 			
 		# Datapoints
-		points = csv.reader(open('map/'+map_name+'.txt', 'rb'), delimiter=',')
+		points = csv.reader(open(path+'/map/'+map_name+'.txt', 'rb'), delimiter=',')
 		for row in points:
 			point = (((float(row[1])+0.5)/mapimg.width * self.scale*2) - self.scale, ((float(row[2])-0.5)/mapimg.width * self.scale*2) - self.scale)
 			if row[0] == 'start':
@@ -182,12 +183,12 @@ class Application(pyglet.window.Window):
 		self.push_handlers(self.keys)
 		
 	def create_husband(self, collision_map, position):
-		character = pyglet.image.load('images/husband.png')
+		character = pyglet.image.load(self.path+'/images/husband.png')
 		character = Texture(character.width, character.height, data=character.get_data('RGBA', character.width*4))
 		return Friendly(character, self.program, 1, 1, position, collision_map, self.normal_mesh)
 		
 	def create_friend(self, collision_map, position, texture):
-		character = pyglet.image.load('images/others.png')
+		character = pyglet.image.load(self.path+'/images/others.png')
 		character = Texture(character.width, character.height, data=character.get_data('RGBA', character.width*4))
 		return Friendly(character, self.program, 1, 1, position, collision_map, self.normal_mesh)
 		
@@ -196,32 +197,32 @@ class Application(pyglet.window.Window):
 		return gold
 		
 	def create_enemy(self, collision_map, position):
-		character = pyglet.image.load('images/enemy.png')
+		character = pyglet.image.load(self.path+'/images/enemy.png')
 		character = Texture(character.width, character.height, data=character.get_data('RGBA', character.width*4))
 		return Enemy(character, self.program, 1, 1, position, collision_map, self.normal_mesh)
 		
 	def create_ground(self, mapimg):
 		gmap = mapimg
 		gtex = Texture(gmap.width, gmap.height, unit=GL_TEXTURE0, data=gmap.get_data('RGBA', gmap.width*4))
-		tiles = pyglet.image.load('images/groundandwalltiles.png')
+		tiles = pyglet.image.load(self.path+'/images/groundandwalltiles.png')
 		ttex = Texture(tiles.width, tiles.height, unit=GL_TEXTURE1, data=tiles.get_data('RGBA', tiles.width*4))
 		tdim = Vector(tiles.width/8, tiles.height/8, 64-8)
 		
-		g = Ground(gtex, ttex, tdim, Vector(gmap.width, gmap.height, 0), Vector(-self.scale, -self.scale, 0), Vector(self.scale, self.scale, 0))
+		g = Ground(gtex, ttex, tdim, Vector(gmap.width, gmap.height, 0), Vector(-self.scale, -self.scale, 0), Vector(self.scale, self.scale, 0), self.path)
 		return g
 		
 	def create_walls(self, mapimg):
 		gmap = mapimg
 		gtex = Texture(gmap.width, gmap.height, unit=GL_TEXTURE0, data=gmap.get_data('RGBA', gmap.width*4))
-		tiles = pyglet.image.load('images/groundandwalltiles.png')
+		tiles = pyglet.image.load(self.path+'/images/groundandwalltiles.png')
 		ttex = Texture(tiles.width, tiles.height, unit=GL_TEXTURE1, data=tiles.get_data('RGBA', tiles.width*4))
 		tdim = Vector(tiles.width/8, tiles.height/8, 64-8)
 		
-		w = Walls(gtex, ttex, tdim, Vector(gmap.width, gmap.height, 0), Vector(-self.scale, -self.scale, 0), Vector(self.scale, self.scale, 0))
+		w = Walls(gtex, ttex, tdim, Vector(gmap.width, gmap.height, 0), Vector(-self.scale, -self.scale, 0), Vector(self.scale, self.scale, 0), self.path)
 		return w
 		
 	def create_protagonist(self, collisionMap, position):
-		character = pyglet.image.load('images/nink.png')
+		character = pyglet.image.load(self.path+'/images/nink.png')
 		character = Texture(character.width, character.height, data=character.get_data('RGBA', character.width*4))
 		return Protagonist(character, self.program, 1, 1, position, collisionMap, self.normal_mesh)
 		
@@ -397,7 +398,7 @@ class Application(pyglet.window.Window):
 				self.heart_mesh[i].draw(GL_QUADS)
 				
 	def create_minimap(self):
-		self.mm_tex = Texture.open('map/%s.png'%(self.map_name), unit=GL_TEXTURE0, filter=GL_NEAREST)
+		self.mm_tex = Texture.open(self.path+'/map/%s.png'%(self.map_name), unit=GL_TEXTURE0, filter=GL_NEAREST)
 		position = [
 			0.4, 0.4, 0,
 			0.4, 1, 0,
@@ -551,5 +552,5 @@ class Application(pyglet.window.Window):
 		return pyglet.event.EVENT_HANDLED
 
 if __name__ == '__main__':
-	window = Application('ground5')
+	window = Application('ground5', os.path.dirname(sys.argv[0]))
 	pyglet.app.run()
