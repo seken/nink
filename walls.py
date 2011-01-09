@@ -27,7 +27,7 @@ class Walls(object):
 		self.max = maxc
 		self.dimc = Vector(maxc.x - minc.x, maxc.y - minc.y, maxc.z - minc.z)
 		self.tdim = tdim
-		self.height = 1.2
+		self.height = 1.5
 		with nested(self.map):
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
