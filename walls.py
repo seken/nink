@@ -43,24 +43,18 @@ class Walls(object):
 		self.tile = []
 		
 		def placeQuad(x1,y1, x2,y2, value):
-			self.quads = self.quads + [x1, 0, y1]
-			self.quads = self.quads + [x2, 0, y2]
-			self.quads = self.quads + [x2, self.height, y2]
-			self.quads = self.quads + [x1, self.height, y1]
-			self.texCoords = self.texCoords + [0, 1, 1, 1, 1, 0, 0, 0]
-			self.tile = self.tile + [value, value, value, value]
+			self.quads.extend([x1, 0, y1, x2, 0, y2, x2, self.height, y2, x1, self.height, y1])
+			self.texCoords.extend([0, 1, 1, 1, 1, 0, 0, 0])
+			self.tile.extend([value, value, value, value])
 			
 		def placeRoof(ax, ay):
 			x1 = (float(ax)/self.map.width)*self.dimc.x + self.min.x
 			x2 = (float(ax+1)/self.map.width)*self.dimc.x + self.min.x
 			y1 = (float(ay)/self.map.height)*self.dimc.y + self.min.y
 			y2 = (float(ay+1)/self.map.height)*self.dimc.y + self.min.y
-			self.quads = self.quads + [x1, self.height, y1]
-			self.quads = self.quads + [x1, self.height, y2]
-			self.quads = self.quads + [x2, self.height, y2]
-			self.quads = self.quads + [x2, self.height, y1]
-			self.texCoords = self.texCoords + [0, 1, 1, 1, 1, 0, 0, 0]
-			self.tile = self.tile + [self.earthVal, self.earthVal, self.earthVal, self.earthVal]
+			self.quads.extend([x1, self.height, y1, x1, self.height, y2, x2, self.height, y2, x2, self.height, y1])
+			self.texCoords.extend([0, 1, 1, 1, 1, 0, 0, 0])
+			self.tile.extend([self.earthVal, self.earthVal, self.earthVal, self.earthVal])
 			
 		for y in range(self.map.height):
 			wallmap.append([])

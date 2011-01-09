@@ -1,15 +1,11 @@
 #!/usr/bin/python
 from __future__ import with_statement
 from contextlib import nested
-import pyglet
+import random, csv, os, webbrowser, hashlib, math, pyglet
 from pyglet.window import key
 from pyglet.gl import *
-import math
 from gletools import ShaderProgram, Sampler2D, Matrix, Texture, VBO
-from pyglet.window import key
 from ctypes import c_float
-import random
-import csv, os
 from ground import Ground
 from walls import Walls
 from vector import Vector
@@ -17,8 +13,7 @@ from protagonist import Protagonist
 from friendly import Friendly
 from enemy import Enemy
 from gold import Gold
-from arrow import Arrow
-import webbrowser, hashlib
+from arrow import Arrow 
 
 def clamp(start, end, value):
 	'''
@@ -177,7 +172,7 @@ class Application(pyglet.window.Window):
 			elif row[0] == 'enemy':
 				self.enemy.append(self.create_enemy(self.walls.collisionMap, point))
 				
-		pyglet.clock.schedule_interval(lambda x: self.on_update(x), 1.0/60.0)
+		pyglet.clock.schedule_interval(lambda x: self.on_update(x), 1.0/50.0)
 		glEnable(GL_DEPTH_TEST)
 		glDepthFunc(GL_LEQUAL)
 		glEnable(GL_BLEND);
@@ -230,7 +225,6 @@ class Application(pyglet.window.Window):
 		return Protagonist(character, self.program, 1, 1, position, collisionMap, self.normal_mesh)
 		
 	def on_update(self, delta):
-		
 		self.time+= delta
 		
 		if self.keys[key.D]:
@@ -256,30 +250,35 @@ class Application(pyglet.window.Window):
 				if not i.update(delta, self):
 					arrow_delete.append(i)
 			
-			map(self.arrows.remove, arrow_delete)
-			
+			remove = self.arrows.remove
+			map(remove, arrow_delete)
+
 			# Update friends
-			dead_friends = map(lambda i : i.update(delta, self), self.friendly)
+			update = Friendly.update
+			dead_friends = map(lambda i : update(i, delta, self), self.friendly)
 			dead_friends.reverse()
 			i = len(dead_friends)
+			pop = self.friendly.pop
 			for j in dead_friends:
 				i -= 1
 				if j == True:
-					self.friendly.pop(i)
-				
+					pop(i)
 			# Update enemy
-			map(lambda i : i.update(delta, self), self.enemy)
+			update = Enemy.update
+			map(lambda i : update(i, delta, self), self.enemy)
 			
 			# Update gold
 			gold_delete = []
+			append = gold_delete.append
 			for i in self.gold:
 				if i.value == 0:
-					gold_delete.append(i)
-			map(self.gold.remove, gold_delete)
-				
+					append(i)
+			remove = self.gold.remove
+			map(remove, gold_delete)
+			
 			# Collision Test
 			self.test_arrows()
-				
+			
 			# End condition tests
 			if self.husband.health < 0:
 				self.death_sound.play()
@@ -297,7 +296,6 @@ class Application(pyglet.window.Window):
 				self.bg_music.pause()
 				self.win_sound.play()
 			
-				
 	def poke_friends(self):
 		if self.player.cooldown < 0:
 			self.player.cooldown = 0.75
@@ -343,15 +341,21 @@ class Application(pyglet.window.Window):
 		self.clear()
 		
 		if self.game == 1:
+			
 			light = random.random()
-			self.ground.draw(self.projection, self.camera, self.player.position, light)
-			self.walls.draw(self.projection, self.camera, self.player.position, light)
+			p = self.player.position
+			
+			self.ground.draw(self.projection, self.camera, p, light)
+			self.walls.draw(self.projection, self.camera, p, light)
 			
 			transparency = self.arrows + self.friendly + self.enemy + self.gold + [self.player]
-			transparency.sort(key=lambda item:item.depth(self.projection * self.camera))
+			
+			mat = self.projection * self.camera
+			transparency.sort(key=lambda item: Protagonist.depth(item, mat))
 			
 			for i in transparency:
-				i.draw(self.projection, self.camera, self.player.position, light)
+				if (p - i.position).len() < 18:
+					i.draw(self.projection, self.camera, p, light)
 				
 			self.draw_hearts()
 		else:
@@ -508,5 +512,5 @@ class Application(pyglet.window.Window):
 		return pyglet.event.EVENT_HANDLED
 
 if __name__ == '__main__':
-	window = Application('ground3')
+	window = Application('ground4')
 	pyglet.app.run()

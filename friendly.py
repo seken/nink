@@ -20,29 +20,28 @@ class Friendly(Protagonist):
 					if not self.collisionMap.collision(self.position + (distance*0.1), self.x/4):
 						self.position = self.position + (distance*0.1)
 		
-		uMoved = False
+			uMoved = False
 		
-		# Follow the money
-		if self.pokeTimer < 0:
-			for i in state.gold:
-				distance = i.position - self.position
-				if distance.len() < 8.0 and self.within(state.player.position):
-					# find the rotation between self and gold
-					self.point(-distance.toAngle() + 0.25)
-					if distance.len() > 1.0:
-						self.move(Vector(1.8, 0, 0)*delta)
-					else:
-						if i.value > delta:
-							self.gold += delta
-							i.value -= delta
+			# Follow the money
+			if self.pokeTimer < 0:
+				for i in state.gold:
+					distance = i.position - self.position
+					if distance.len() < 8.0 and self.within(state.player.position):
+						# find the rotation between self and gold
+						self.point(-distance.toAngle() + 0.25)
+						if distance.len() > 1.0:
+							self.move(Vector(1.8, 0, 0)*delta)
 						else:
-							self.gold += i.value
-							i.value = 0
-					uMoved = True
-					break
+							if i.value > delta:
+								self.gold += delta
+								i.value -= delta
+							else:
+								self.gold += i.value
+								i.value = 0
+						uMoved = True
+						break
 					
-		# Kill the bad guys
-		if (self.position - state.player.position).len() < 15:
+			# Kill the bad guys
 			for i in state.enemy:
 				distance = i.position - self.position
 			
