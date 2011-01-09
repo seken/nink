@@ -305,7 +305,7 @@ class Application(pyglet.window.Window):
 	
 	def fire_arrow(self, person):
 		if person.cooldown < 0:
-			person.cooldown = 0.75
+			person.cooldown = 0.6
 			self.arrow_sound.play()
 			position = (person.position.x, person.position.z)
 			arrow = Arrow(self.arrowTex, self.program, 1, 1, position, person.collisionMap, self.normal_mesh)
@@ -512,5 +512,5 @@ class Application(pyglet.window.Window):
 		return pyglet.event.EVENT_HANDLED
 
 if __name__ == '__main__':
-	window = Application('ground4')
+	window = Application('ground5')
 	pyglet.app.run()
