@@ -514,15 +514,15 @@ class Application(pyglet.window.Window):
 				self.game = 1
 				self.bg_music = self.bg_music.play()
 			elif self.game == 2 or self.game == 3:
-				exit()
+				sys.exit()
 			elif self.game == 4:
 				md5 = self.calc_map_code()
 				score = self.calc_score()
 				webbrowser.open_new_tab('http://game.seken.co.uk/nink?map=%s&score=%s'%(md5, str(score)))
-				exit()
+				sys.exit()
 				
 		elif symbol == key.ESCAPE or symbol == key.Q:
-			exit()
+			sys.exit()
 			
 	def calc_map_code(self):
 		m = hashlib.md5()
