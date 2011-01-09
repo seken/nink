@@ -45,7 +45,7 @@ class Application(pyglet.window.Window):
 		self.mapSize = 64
 		self.mapTexture = Texture(self.mapSize, self.mapSize, data=[0,0,0,255]*(self.mapSize*self.mapSize))
 		
-		self.probContinue = 0.75
+		self.probContinue = 0.79
 		self.minSquares = 10
 		
 		# keep away from start and friends (and gold)
@@ -55,11 +55,11 @@ class Application(pyglet.window.Window):
 		self.husband_distance = 30
 		
 		# probability of placement
-		self.prob_goblin = 0.03
-		self.prob_friend = 0.03
-		self.prob_gold = 0.03
-		self.prob_king = 0.008
-		self.prob_husband = 0.008
+		self.prob_goblin = 0.1
+		self.prob_friend = 0.1
+		self.prob_gold = 0.1
+		self.prob_king = 0.01
+		self.prob_husband = 0.01
 		
 		self.new_map()
 		
@@ -120,7 +120,8 @@ class Application(pyglet.window.Window):
 		p = open('points.txt', 'w')
 		p.write('start, %d, %d\n'%(self.start_point[0], self.mapSize - self.start_point[1]))
 		p.write('husband, %d, %d\n'%(self.husband[0], self.mapSize - self.husband[1]))
-		p.write('king, %d, %d\n'%(self.king_goblin[0], self.mapSize - self.king_goblin[1]))
+		if self.king_goblin != None:
+			p.write('king, %d, %d\n'%(self.king_goblin[0], self.mapSize - self.king_goblin[1]))
 		for i in self.friendly:
 			p.write('friend, %d, %d\n'%(i[0], self.mapSize - i[1]))
 		for i in self.gold:
@@ -157,9 +158,9 @@ class Application(pyglet.window.Window):
 			point = points[0]
 			points = points[1:]
 			
-			if point[0] < 0 or point[0] >= self.mapSize:
+			if point[0] < 1 or point[0] >= self.mapSize-1:
 				continue
-			if point[1] < 0 or point[1] >= self.mapSize:
+			if point[1] < 1 or point[1] >= self.mapSize-1:
 				continue
 			
 			if self.can_add(point):
@@ -205,6 +206,10 @@ class Application(pyglet.window.Window):
 					self.add_goblin_king((x,y))
 					self.add_friend((x,y))
 
+		print 'goblins: %s'%(len(self.goblin))
+		print 'friendly: %s'%(len(self.friendly))
+		print 'gold: %s'%(len(self.gold))
+		
 		self.mapTexture.update()
 		with nested(self.mapTexture):
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)

@@ -55,7 +55,7 @@ class Friendly(Protagonist):
 				else:
 					if distance.len() < 1.0:
 						self.point(-distance.toAngle() + 0.25)
-						state.fire_arrow(self)
+						state.fire_sword(self, i)
 						uMoved = True
 						break
 		
@@ -67,6 +67,8 @@ class Friendly(Protagonist):
 				if distance.len() > 2.0:
 					self.move(Vector(2.0, 0, 0)*delta)
 			super(Friendly, self).update(delta, state)
+			
+		return self.health <= 0
 		
 	def poked(self):
 		self.pokeTimer = 4.0

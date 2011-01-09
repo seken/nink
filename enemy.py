@@ -5,6 +5,7 @@ class Enemy(Protagonist):
 	def __init__(self, texture, program, x, y, position, collisionMap, mesh):
 		super(Enemy, self).__init__(texture, program, x, y, position, collisionMap, mesh)
 		self.cooldown = 0.0
+		self.health = 30
 		
 	def update(self, delta, state):
 		self.cooldown -= delta

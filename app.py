@@ -18,7 +18,7 @@ from friendly import Friendly
 from enemy import Enemy
 from gold import Gold
 from arrow import Arrow
-import time
+import webbrowser, hashlib
 
 def clamp(start, end, value):
 	'''
@@ -57,6 +57,10 @@ class Application(pyglet.window.Window):
 		self.winTexture = Texture.open('images/win.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
 		self.make_menu_mesh()
 		
+		# Healthbar
+		self.heart = Texture.open('images/heart.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
+		self.make_heart_meshes()
+		
 		# Sounds
 		self.bg_music = pyglet.media.load('sound/TIGshot.mp3')
 		self.win_sound = pyglet.media.load('sound/win.wav')
@@ -78,6 +82,7 @@ class Application(pyglet.window.Window):
 		self.program.vars.tex = Sampler2D(GL_TEXTURE0)
 		
 		# Map
+		self.map_name = map_name
 		mapimg = pyglet.image.load('map/'+map_name+'.png')
 		self.ground = self.create_ground(mapimg)
 		self.walls = self.create_walls(mapimg)
@@ -254,7 +259,13 @@ class Application(pyglet.window.Window):
 			map(self.arrows.remove, arrow_delete)
 			
 			# Update friends
-			map(lambda i : i.update(delta, self), self.friendly)
+			dead_friends = map(lambda i : i.update(delta, self), self.friendly)
+			dead_friends.reverse()
+			i = len(dead_friends)
+			for j in dead_friends:
+				i -= 1
+				if j == True:
+					self.friendly.pop(i)
 				
 			# Update enemy
 			map(lambda i : i.update(delta, self), self.enemy)
@@ -302,6 +313,12 @@ class Application(pyglet.window.Window):
 			arrow = Arrow(self.arrowTex, self.program, 1, 1, position, person.collisionMap, self.normal_mesh)
 			arrow.point(person.angle)
 			self.arrows.append(arrow)
+			
+	def fire_sword(self, person, other):
+		if person.cooldown < 0:
+			person.cooldown = 0.75
+			self.arrow_sound.play()
+			other.hit()
 	
 	def test_arrows(self):
 		hit_enemies = []
@@ -309,9 +326,11 @@ class Application(pyglet.window.Window):
 		for a in self.arrows:
 			for e in self.enemy:
 				if (a.position - e.position).len() < e.x/2:
-					hit_enemies.append(e)
 					hit_arrows.append(a)
-					self.goblin_death_sound.play()
+					e.hit()
+					if e.health <= 0:
+						hit_enemies.append(e)
+						self.goblin_death_sound.play()
 					break
 		remove = self.enemy.remove
 		map(remove, hit_enemies)
@@ -331,6 +350,8 @@ class Application(pyglet.window.Window):
 			
 			for i in transparency:
 				i.draw(self.projection, self.camera, self.player.position, light)
+				
+			self.draw_hearts()
 		else:
 			self.draw_menu(self.game)
 	
@@ -353,6 +374,18 @@ class Application(pyglet.window.Window):
 			
 		with nested(self.program, tex):
 			self.menu_mesh.draw(GL_QUADS)
+			
+	def draw_hearts(self):
+		self.program.vars.mvp = Matrix()
+		self.program.vars.modelview = Matrix()
+		self.program.vars.playerPosition = (0.0, 0.0, 0.0)
+		self.program.vars.playerLight = random.random()*0.1 + 0.9
+		with nested(self.program, self.heart):
+			count = int(self.player.health/10)
+			if self.player.health < 10 and self.player.health > 0:
+				count = 1
+			for i in range(count):
+				self.heart_mesh[i].draw(GL_QUADS)
 	
 	def make_menu_mesh(self):
 		position = [
@@ -380,6 +413,36 @@ class Application(pyglet.window.Window):
 			position_3=position,
 			texCoord_2=texCoord,
 			normal_3=normal)
+			
+	def make_heart_meshes(self):
+		texCoord = [
+			0, 1,
+			0, 0,
+			1, 0,
+			1, 1,
+		]
+		normal = [
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+		]
+		texCoord = (c_float*len(texCoord))(*texCoord)
+		normal = (c_float*len(normal))(*normal)
+
+		self.heart_mesh = []
+		for i in range(10):
+			position = [
+				-0.95+i*0.05, 0.90, 0,
+				-0.95+i*0.05, 0.95, 0,
+				-0.95+i*0.05 + 0.05, 0.95, 0,
+				-0.95+i*0.05 + 0.05, 0.90, 0,
+			]
+			position = (c_float*len(position))(*position)
+			self.heart_mesh.append(VBO(4,
+				position_3=position,
+				texCoord_2=texCoord,
+				normal_3=normal))
 	
 	def update_camera(self):
 		pPos = self.player.position
@@ -390,10 +453,30 @@ class Application(pyglet.window.Window):
 			if self.game == 0:
 				self.game = 1
 				self.bg_music = self.bg_music.play()
-			elif self.game == 2 or self.game == 3 or self.game == 4:
+			elif self.game == 2 or self.game == 3:
 				exit()
+			elif self.game == 4:
+				md5 = self.calc_map_code()
+				score = self.calc_score()
+				webbrowser.open_new_tab('http://nink.seken.co.uk/?map=%s&score=%s'%(md5, str(score)))
+				exit()
+				
 		elif symbol == key.ESCAPE or symbol == key.Q:
 			exit()
+			
+	def calc_map_code(self):
+		m = hashlib.md5()
+		m.update(open('map/%s.png'%(self.map_name), 'rb').read())
+		m.update(open('map/%s.txt'%(self.map_name), 'rb').read())
+		return m.hexdigest()
+		
+	def calc_score(self):
+		score = 0.0
+		for i in self.friendly:
+			if (i.position - self.start_point).len() < 4:
+				score += i.gold
+		score = score * (600-self.time)
+		return score
 				
 	def on_mouse_motion(self, x, y, dx, dy):
 		return pyglet.event.EVENT_HANDLED
@@ -423,5 +506,5 @@ class Application(pyglet.window.Window):
 		return pyglet.event.EVENT_HANDLED
 
 if __name__ == '__main__':
-	window = Application('ground5')
+	window = Application('ground3')
 	pyglet.app.run()
