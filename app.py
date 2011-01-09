@@ -18,6 +18,7 @@ from friendly import Friendly
 from enemy import Enemy
 from gold import Gold
 from arrow import Arrow
+import time
 
 def clamp(start, end, value):
 	'''
@@ -50,28 +51,12 @@ class Application(pyglet.window.Window):
 		super(Application, self).__init__(resizable=True, width=512, height=512, caption='Nink saves the town')
 		
 		# Start screen
-		menuImage = pyglet.image.load('images/start.png')
-		self.menuTexture = Texture(menuImage.width, menuImage.height, unit=GL_TEXTURE0, data=menuImage.get_data('RGBA', menuImage.width*4))
-		menuImage = pyglet.image.load('images/husb_death.png')
-		self.husbTexture = Texture(menuImage.width, menuImage.height, unit=GL_TEXTURE0, data=menuImage.get_data('RGBA', menuImage.width*4))
-		menuImage = pyglet.image.load('images/nink_death.png')
-		self.ninkTexture = Texture(menuImage.width, menuImage.height, unit=GL_TEXTURE0, data=menuImage.get_data('RGBA', menuImage.width*4))
-		menuImage = pyglet.image.load('images/win.png')
-		self.winTexture = Texture(menuImage.width, menuImage.height, unit=GL_TEXTURE0, data=menuImage.get_data('RGBA', menuImage.width*4))
-		with nested(self.menuTexture):
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-		with nested(self.husbTexture):
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-		with nested(self.ninkTexture):
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-		with nested(self.winTexture):
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+		self.menuTexture = Texture.open('images/start.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
+		self.husbTexture = Texture.open('images/husb_death.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
+		self.ninkTexture = Texture.open('images/nink_death.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
+		self.winTexture = Texture.open('images/win.png', unit=GL_TEXTURE0, filter=GL_NEAREST)
 		self.make_menu_mesh()
-	
+		
 		# Sounds
 		self.bg_music = pyglet.media.load('sound/TIGshot.mp3')
 		self.win_sound = pyglet.media.load('sound/win.wav')
@@ -87,9 +72,10 @@ class Application(pyglet.window.Window):
 		self.game = 0
 		self.camera = Matrix()
 		self.camera = self.camera.translate(0, -5, -10)
+		
+		# Main shader
 		self.program = ShaderProgram.open('shaders/main.shader')
 		self.program.vars.tex = Sampler2D(GL_TEXTURE0)
-		self.characters = pyglet.image.ImageGrid(pyglet.image.load('images/char.png'),16,31, 8, 8)
 		
 		# Map
 		mapimg = pyglet.image.load('map/'+map_name+'.png')
@@ -376,10 +362,10 @@ class Application(pyglet.window.Window):
 			1, -1, 0,
 		]
 		texCoord = [
-			0, 0,
 			0, 1,
-			1, 1,
+			0, 0,
 			1, 0,
+			1, 1,
 		]
 		normal = [
 			0, 0, 1,
@@ -397,7 +383,7 @@ class Application(pyglet.window.Window):
 	
 	def update_camera(self):
 		pPos = self.player.position
-		self.camera = Matrix().rotatex(0.07) * Matrix().rotatey(self.player.angle) * Matrix().translate(-pPos.x, -pPos.y, -pPos.z) * Matrix().translate(-6*math.sin(-self.player.angle*2*math.pi), -3, -6*math.cos(-self.player.angle*2*math.pi))
+		self.camera = Matrix().rotatex(0.07) * Matrix().rotatey(self.player.angle) * Matrix().translate(-pPos.x, -pPos.y, -pPos.z) * Matrix().translate(-7*math.sin(-self.player.angle*2*math.pi), -4, -7*math.cos(-self.player.angle*2*math.pi))
 	
 	def on_key_press(self, symbol, modifiers):
 		if symbol == key.ENTER:
