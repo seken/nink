@@ -569,5 +569,5 @@ if __name__ == '__main__':
 	path = os.path.dirname(sys.argv[0])
 	if len(path) == 0:
 		path='.'
-	window = Application('ground5', path)
+	window = Application('ground', path)
 	pyglet.app.run()
