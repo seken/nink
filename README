@@ -40,3 +40,7 @@ Requirements
 Python 2.?
 gletools (by Florian Bšsch) http://codeflow.org/entries/2009/jul/31/gletools-advanced-pyglet-utilities/ - included
 piglet (Copyright 2006-2008 Alex Holkner) http://www.pyglet.org/ - included
+
+License
+---------
+The license covers just the code produced for the Reddit Code Jam 5
