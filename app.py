@@ -460,7 +460,7 @@ class Application(pyglet.window.Window):
 			elif self.game == 4:
 				md5 = self.calc_map_code()
 				score = self.calc_score()
-				webbrowser.open_new_tab('http://nink.seken.co.uk/?map=%s&score=%s'%(md5, str(score)))
+				webbrowser.open_new_tab('http://game.seken.co.uk/nink?map=%s&score=%s'%(md5, str(score)))
 				exit()
 				
 		elif symbol == key.ESCAPE or symbol == key.Q:
