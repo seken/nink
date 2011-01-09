@@ -45,8 +45,8 @@ def gaus2d(xc, yc, xs, ys, x, y):
 	j=math.pow(y-yc,2)/(2*math.pow(ys,2))
 	return math.pow(math.e, -(i+j))
 						
-class Application(pyglet.window.Window, map_name):
-	def __init__(self):
+class Application(pyglet.window.Window):
+	def __init__(self, map_name):
 		super(Application, self).__init__(resizable=True, width=512, height=512, caption='Nink saves the town')
 		
 		# Start screen
@@ -202,7 +202,6 @@ class Application(pyglet.window.Window, map_name):
 			self.poke_friends()
 			
 		if self.game == 1:
-			self.ground.update(delta)
 			self.player.update(delta, self)
 			self.update_camera()
 			
@@ -236,7 +235,7 @@ class Application(pyglet.window.Window, map_name):
 				self.bg_music.pause()
 				self.game = 3
 			
-			
+			# Win condition
 			distanceToSteps = (self.player.position - self.start_point) + (self.husband.position - self.start_point)
 			if distanceToSteps.len() < 4:
 				self.game = 4
@@ -380,5 +379,5 @@ class Application(pyglet.window.Window, map_name):
 		return pyglet.event.EVENT_HANDLED
 
 if __name__ == '__main__':
-	window = Application('ground3')
+	window = Application('ground4')
 	pyglet.app.run()

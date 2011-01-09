@@ -43,10 +43,7 @@ class Ground(object):
 		self.mesh = VBO(4,
 			position_3=position,
 			texCoord_2=texCoord)
-				
-	def update(self, delta):
-		pass
-		
+						
 	def draw(self, projection, camera, player_position, r):	
 		self.prog.vars.mvp = projection * camera
 		with nested(self.prog):
